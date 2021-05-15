@@ -2,7 +2,6 @@
 # this class combines all basic features of a generic player
 import numpy as np
 
-
 class Player:
 
 	def __init__(self):
