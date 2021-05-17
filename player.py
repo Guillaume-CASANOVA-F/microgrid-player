@@ -74,7 +74,7 @@ class Player:
     
 if __name__ == "__main__":
     prices = 100*np.random.rand(48)
-    scenario_data = np.random.rand(73, 50)
+    scenario_data = 40 + 60*np.random.rand(48)
     Industrial_consumer = Player()
     Industrial_consumer.set_prices(prices)
     Industrial_consumer.set_scenario(scenario_data)
