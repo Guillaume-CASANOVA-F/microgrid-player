@@ -42,13 +42,15 @@ class Player:
             var_name = "battery_load_moins" + str(t)
             variables[t]["battery_load_moins"] = pulp.LpVariable(var_name, 0, self.Pmax)
 
-            #stock = delta_t * pulp.lpSum([ (rho_c * variables[s]["battery_load_+"] - (variables[s]["battery_load_-"] * (1/rho_d) ) ) for s in range(t) ] )
+            stock = self.delta_t * pulp.lpSum([(self.rho_c * variables[s]["battery_load_plus"] - (
+                                    variables[s]["battery_load_moins"] * (1 / self.rho_d))) for s in
+                                                                    range(t)])
 
             constraint_name = "stock_positif" + str(t)
-            my_lp_problem += self.delta_t * pulp.lpSum([ (self.rho_c * variables[s]["battery_load_plus"] - (variables[s]["battery_load_moins"] * (1/self.rho_d) ) ) for s in range(t) ] ) >= 0, constraint_name
+            my_lp_problem += stock >= 0, constraint_name
 
             constraint_name = "stock_ne_depasse_pas_la_capacite" + str(t)
-            my_lp_problem += self.delta_t * pulp.lpSum([ (self.rho_c * variables[s]["battery_load_plus"] - (variables[s]["battery_load_moins"] * (1/self.rho_d) ) ) for s in range(t) ] ) <= self.Capa, constraint_name
+            my_lp_problem +=stock <= self.Capa, constraint_name
 
         my_lp_problem.setObjective(pulp.lpSum( [ ( ( self.prices[t] - (self.rho_c * self.rho_d * self.delta_t * self.prices[self.horizon-1]) ) * variables[t]["battery_load_plus"] ) - ( self.prices[t] - ( self.delta_t * self.prices[self.horizon-1] ) * variables[t]["battery_load_moins"] )  for t in range(self.horizon)] ))
         my_lp_problem.solve()
