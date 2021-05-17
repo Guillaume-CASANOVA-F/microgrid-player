@@ -35,10 +35,10 @@ class Player:
             variables[t] = {}
 
             var_name = "battery_load_+" + str(t)
-            variables[t]["battery_load_+"] = pulp.LpVariable(var_name, 0, Pmax)
+            variables[t]["battery_load_+"] = pulp.LpVariable(var_name, 0, self.Pmax)
 
             var_name = "battery_load_-" + str(t)
-            variables[t]["battery_load_-"] = pulp.LpVariable(var_name, 0, Pmax)
+            variables[t]["battery_load_-"] = pulp.LpVariable(var_name, 0, self.Pmax)
 
             #stock = delta_t * pulp.lpSum([ (rho_c * variables[s]["battery_load_+"] - (variables[s]["battery_load_-"] * (1/rho_d) ) ) for s in range(t) ] )
 
