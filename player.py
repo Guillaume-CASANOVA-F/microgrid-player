@@ -2,6 +2,8 @@
 # this class combines all basic features of a generic player
 import numpy as np
 import pulp
+import pansas as pd
+import os
 
 class Player:
 
@@ -74,8 +76,9 @@ class Player:
     
 if __name__ == "__main__":
     prices = 100*np.random.rand(48)
-    scenario_data = 40 + 60*np.random.rand(48)
+    data = pd.read_csv(os.path.join(os.getcwd(), "indus_cons_scenarios.csv"), sep=";", decimal=".")
+    scenario_data = np.array(data["cons (kW)"])
     Industrial_consumer = Player()
     Industrial_consumer.set_prices(prices)
     Industrial_consumer.set_scenario(scenario_data)
-    print(Industrial_consumer.compute_all_load())
+    print(Industrial_consumer.compute_battery_load())
