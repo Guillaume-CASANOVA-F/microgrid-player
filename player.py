@@ -2,8 +2,9 @@
 # this class combines all basic features of a generic player
 import numpy as np
 import pulp
-import pansas as pd
+import pandas as pd
 import os
+
 
 class Player:
 
@@ -43,22 +44,31 @@ class Player:
             variables[t]["battery_load_moins"] = pulp.LpVariable(var_name, 0, self.Pmax)
 
             stock = self.delta_t * pulp.lpSum([(self.rho_c * variables[s]["battery_load_plus"] - (
-                                    variables[s]["battery_load_moins"] * (1 / self.rho_d))) for s in
-                                                                    range(t)])
+                    variables[s]["battery_load_moins"] * (1 / self.rho_d))) for s in
+                                               range(t+1)])
 
             constraint_name = "stock_positif" + str(t)
             my_lp_problem += stock >= 0, constraint_name
 
             constraint_name = "stock_ne_depasse_pas_la_capacite" + str(t)
-            my_lp_problem +=stock <= self.Capa, constraint_name
+            my_lp_problem += stock <= self.Capa, constraint_name
 
-        my_lp_problem.setObjective(pulp.lpSum( [ ( ( self.prices[t] - (self.rho_c * self.rho_d * self.delta_t * self.prices[self.horizon-1]) ) * variables[t]["battery_load_plus"] ) - ( self.prices[t] - ( self.delta_t * self.prices[self.horizon-1] ) * variables[t]["battery_load_moins"] )  for t in range(self.horizon)] ))
+        #my_lp_problem.setObjective(pulp.lpSum([((self.prices[t] - (
+        #            self.rho_c * self.rho_d * self.delta_t * self.prices[self.horizon - 1])) * variables[t][
+        #                                            "battery_load_plus"]) - (self.prices[t] - (
+        #            self.delta_t * self.prices[self.horizon - 1]) * variables[t]["battery_load_moins"]) for t in
+        #                                       range(self.horizon)]))
+        my_lp_problem.setObjective( pulp.lpSum(
+            [self.prices[t] * self.delta_t * (variables[t]["battery_load_plus"] - variables[t]["battery_load_moins"])
+             for t in
+             range(self.horizon)]) - self.rho_d * stock * self.prices[self.horizon-1])
+
         my_lp_problem.solve()
 
         battery_load = []
 
         for t in range(self.horizon):
-            battery_load.append( variables[t]["battery_load_plus"].value() - variables[t]["battery_load_moins"].value() )
+            battery_load.append(variables[t]["battery_load_plus"].varValue - variables[t]["battery_load_moins"].varValue)
 
         return battery_load
 
@@ -75,9 +85,13 @@ class Player:
     def reset(self):
         # reset all observed data
         pass
-    
+
+
 if __name__ == "__main__":
-    prices = 100*np.random.rand(48)
+    #prices = 100 * np.random.rand(48)
+    prices = 100 * np.ones(48)
+    prices[0] = 10
+    prices[20] = 150
     data = pd.read_csv(os.path.join(os.getcwd(), "indus_cons_scenarios.csv"), sep=";", decimal=".")
     scenario_data = np.array(data["cons (kW)"])
     Industrial_consumer = Player()
