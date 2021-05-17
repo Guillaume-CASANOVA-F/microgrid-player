@@ -23,7 +23,7 @@ class Player:
     def compute_all_load(self):
         load = np.zeros(self.horizon)
         for time in range(self.horizon):
-            load[time] = self.compute_load(time)
+            load[time] = self.take_decision(time)
         return load
 
     def compute_battery_load(self):
@@ -54,7 +54,7 @@ class Player:
         battery_load = []
 
         for t in range(self.horizon):
-            battery_load.append( variables[t]["battery_load_+"].value() - variables[t]["battery_load_-"].value() )
+            battery_load.append( variables[t]["battery_load_plus"].value() - variables[t]["battery_load_moins"].value() )
 
         return battery_load
 
