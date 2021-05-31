@@ -63,6 +63,8 @@ class Player:
              for t in
              range(self.horizon)]) - self.rho_d * (stock_final - self.stock_initial) * self.prices[self.horizon-1])
 
+        self.stock_initial = stock_final.value()
+        
         my_lp_problem.solve()
         battery_load = []
 
